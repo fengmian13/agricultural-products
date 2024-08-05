@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.RoleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.agricultural.products.entity.Role">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="description" property="description" />
+        <result column="flag" property="flag" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, description, flag
+    </sql>
+
+
+
+    <insert id="insert">
+        insert into sys_role
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            name,
+            description,
+            flag,
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{name},
+            #{description},
+            #{flag},
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_role set
+        <trim suffixOverrides=",">
+            name = #{name},
+            description = #{description},
+            flag = #{flag},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.Role">
+        select
+            <include refid="Base_Column_List"></include>
+        from sys_role
+        <where>
+            <if test="role.name != null and role.name != ''">
+                and name like concat('%', #{role.name}, '%')
+            </if>
+            <if test="role.description != null and role.description != ''">
+                and description like concat('%', #{role.description}, '%')
+            </if>
+            <if test="role.flag != null and role.flag != ''">
+                and flag like concat('%', #{role.flag}, '%')
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.Role">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_role
+        where id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_role where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_role where id = #{id}
+    </delete>
+
+
+</mapper>

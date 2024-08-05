@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.WaterMapper">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Water_Base_Column_List">
+        sw.id, sw.sid, sw.water_time, sw.waterer, sw.water_amount, sw.create_user, sw.create_time, sw.img
+    </sql>
+
+    <insert id="insert">
+        insert into sys_water
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            sid,
+            water_time,
+            waterer,
+            water_amount,
+            create_user,
+            <if test="createTime != null">
+                create_time,
+            </if>
+            img,
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{sid},
+            #{waterTime},
+            #{waterer},
+            #{waterAmount},
+            #{createUser},
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            #{img},
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_water set
+        <trim suffixOverrides=",">
+            sid = #{sid},
+            water_time = #{waterTime},
+            waterer = #{waterer},
+            water_amount = #{waterAmount},
+            img = #{img},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.dto.WaterDTO">
+        select
+            <include refid="Water_Base_Column_List"></include>
+            ,su.full_name as createUserName
+        from sys_water sw
+        inner join sys_user su on sw.create_user = su.username
+        <where>
+            <if test="water.sid != null">
+                and sw.sid = #{water.sid}
+            </if>
+            <if test="water.waterer != null and water.waterer != ''">
+                and sw.waterer like concat('%', #{water.waterer}, '%')
+            </if>
+            <if test="water.waterAmount != null and water.waterAmount != ''">
+                and sw.water_amount like concat('%', #{water.waterAmount}, '%')
+            </if>
+            <if test="water.createUser != null and water.createUser != ''">
+                and sw.create_user = #{water.createUser}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.dto.WaterDTO">
+        select
+        <include refid="Water_Base_Column_List"></include>
+        ,su.full_name as createUserName
+        from sys_water sw
+        inner join sys_user su on sw.create_user = su.username
+        where  sw.id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_water where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_water where id = #{id}
+    </delete>
+
+
+</mapper>

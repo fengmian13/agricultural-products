@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.AdvertisementMapper">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Advertisement_Base_Column_List">
+        sa.id, sa.goods, sa.description, sa.img, sa.create_user, sa.create_time
+    </sql>
+
+    <insert id="insert">
+        insert into sys_advertisement
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            goods,
+            description,
+            img,
+            create_user,
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{goods},
+            #{description},
+            #{img},
+            #{createUser},
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_advertisement set
+        <trim suffixOverrides=",">
+            goods = #{goods},
+            description = #{description},
+            img = #{img},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.dto.AdvertisementDTO">
+        select
+            <include refid="Advertisement_Base_Column_List"></include>
+            ,su.full_name as createUserName
+        from sys_advertisement sa
+        inner join sys_user su on sa.create_user = su.username
+        <where>
+            <if test="advertisement.goods != null and advertisement.goods != ''">
+                and sa.goods like concat('%', #{advertisement.goods}, '%')
+            </if>
+            <if test="advertisement.description != null and advertisement.description != ''">
+                and sa.description like concat('%', #{advertisement.description}, '%')
+            </if>
+            <if test="advertisement.createUser != null and advertisement.createUser != ''">
+                and sa.create_user = #{advertisement.createUser}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.dto.AdvertisementDTO">
+        select
+        <include refid="Advertisement_Base_Column_List"></include>
+        ,su.full_name as createUserName
+        from sys_advertisement sa
+        inner join sys_user su on sa.create_user = su.username
+        where  sa.id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_advertisement where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_advertisement where id = #{id}
+    </delete>
+
+
+</mapper>

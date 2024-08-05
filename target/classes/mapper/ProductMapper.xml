@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.ProductMapper">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Product_Base_Column_List">
+        sp.id, sp.sid, sp.name, sp.area, sp.shelf_life, sp.sowing_time, sp.fertilization_num, sp.water_num, sp.harvest_time, sp.create_user, sp.create_time, sp.img
+    </sql>
+
+    <insert id="insert">
+        insert into sys_product
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            sid,
+            name,
+            area,
+            shelf_life,
+            sowing_time,
+            fertilization_num,
+            water_num,
+            harvest_time,
+            create_user,
+            <if test="createTime != null">
+                create_time,
+            </if>
+            img,
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{sid},
+            #{name},
+            #{area},
+            #{shelfLife},
+            #{sowingTime},
+            #{fertilizationNum},
+            #{waterNum},
+            #{harvestTime},
+            #{createUser},
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            #{img},
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_product set
+        <trim suffixOverrides=",">
+            sid = #{sid},
+            name = #{name},
+            area = #{area},
+            shelf_life = #{shelfLife},
+            sowing_time = #{sowingTime},
+            fertilization_num = #{fertilizationNum},
+            water_num = #{waterNum},
+            harvest_time = #{harvestTime},
+            img = #{img},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.dto.ProductDTO">
+        select
+            <include refid="Product_Base_Column_List"></include>
+            ,su.full_name as createUserName
+        from sys_product sp
+        inner join sys_user su on sp.create_user = su.username
+        <where>
+            <if test="product.sid != null">
+                and sp.sid = #{product.sid}
+            </if>
+            <if test="product.area != null and product.area != ''">
+                and sp.area like concat('%', #{product.area}, '%')
+            </if>
+            <if test="product.shelfLife != null and product.shelfLife != ''">
+                and sp.shelf_life like concat('%', #{product.shelfLife}, '%')
+            </if>
+            <if test="product.fertilizationNum != null">
+                and sp.fertilization_num = #{product.fertilizationNum}
+            </if>
+            <if test="product.waterNum != null">
+                and sp.water_num = #{product.waterNum}
+            </if>
+            <if test="product.name != null and product.name != ''">
+                and sp.name like concat('%', #{product.name}, '%')
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.dto.ProductDTO">
+        select
+        <include refid="Product_Base_Column_List"></include>
+        ,su.full_name as createUserName
+        from sys_product sp
+        inner join sys_user su on sp.create_user = su.username
+        where  sp.id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_product where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_product where id = #{id}
+    </delete>
+
+
+</mapper>

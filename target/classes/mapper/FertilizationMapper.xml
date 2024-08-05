@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.FertilizationMapper">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Fertilization_Base_Column_List">
+        sf.id, sf.sid, sf.fertilization_time, sf.fertilizationer, sf.fertilizer_type, sf.create_user, sf.create_time, sf.img
+    </sql>
+
+    <insert id="insert">
+        insert into sys_fertilization
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            sid,
+            fertilization_time,
+            fertilizationer,
+            fertilizer_type,
+            create_user,
+            <if test="createTime != null">
+                create_time,
+            </if>
+            img,
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{sid},
+            #{fertilizationTime},
+            #{fertilizationer},
+            #{fertilizerType},
+            #{createUser},
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            #{img},
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_fertilization set
+        <trim suffixOverrides=",">
+            sid = #{sid},
+            fertilization_time = #{fertilizationTime},
+            fertilizationer = #{fertilizationer},
+            fertilizer_type = #{fertilizerType},
+            img = #{img},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.dto.FertilizationDTO">
+        select
+            <include refid="Fertilization_Base_Column_List"></include>
+            ,su.full_name as createUserName
+        from sys_fertilization sf
+        inner join sys_user su on sf.create_user = su.username
+        <where>
+            <if test="fertilization.sid != null">
+                and sf.sid = #{fertilization.sid}
+            </if>
+            <if test="fertilization.fertilizationer != null and fertilization.fertilizationer != ''">
+                and sf.fertilizationer like concat('%', #{fertilization.fertilizationer}, '%')
+            </if>
+            <if test="fertilization.fertilizerType != null and fertilization.fertilizerType != ''">
+                and sf.fertilizer_type like concat('%', #{fertilization.fertilizerType}, '%')
+            </if>
+            <if test="fertilization.createUser != null and fertilization.createUser != ''">
+                and sf.create_user = #{fertilization.createUser}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.dto.FertilizationDTO">
+        select
+        <include refid="Fertilization_Base_Column_List"></include>
+        ,su.full_name as createUserName
+        from sys_fertilization sf
+        inner join sys_user su on sf.create_user = su.username
+        where  sf.id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_fertilization where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_fertilization where id = #{id}
+    </delete>
+
+
+</mapper>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.FarmToolMapper">
+
+    <!-- 通用查询结果列 -->
+    <sql id="FarmTool_Base_Column_List">
+        sft.id, sft.eid, sft.tool_type, sft.tool_num, sft.img, sft.price, sft.create_user, sft.create_time
+    </sql>
+
+    <insert id="insert">
+        insert into sys_farm_tool
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            eid,
+            tool_type,
+            tool_num,
+            img,
+            price,
+            create_user,
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{eid},
+            #{toolType},
+            #{toolNum},
+            #{img},
+            #{price},
+            #{createUser},
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_farm_tool set
+        <trim suffixOverrides=",">
+            eid = #{eid},
+            tool_type = #{toolType},
+            tool_num = #{toolNum},
+            img = #{img},
+            price = #{price},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.dto.FarmToolDTO">
+        select
+            <include refid="FarmTool_Base_Column_List"></include>
+            ,su.full_name as createUserName
+            ,se.name as enterpriseName
+        from sys_farm_tool sft
+        inner join sys_user su on sft.create_user = su.username
+        inner join sys_enterprise se on se.id = sft.eid
+        <where>
+            <if test="farmTool.eid != null">
+                and sft.eid = #{farmTool.eid}
+            </if>
+            <if test="farmTool.toolType != null and farmTool.toolType != ''">
+                and sft.tool_type like concat('%', #{farmTool.toolType}, '%')
+            </if>
+            <if test="farmTool.toolNum != null">
+                and sft.tool_num = #{farmTool.toolNum}
+            </if>
+            <if test="farmTool.price != null and farmTool.price != ''">
+                and sft.price like concat('%', #{farmTool.price}, '%')
+            </if>
+            <if test="farmTool.createUser != null and farmTool.createUser != ''">
+                and sft.create_user = #{farmTool.createUser}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.dto.FarmToolDTO">
+        select
+        <include refid="FarmTool_Base_Column_List"></include>
+        ,su.full_name as createUserName
+        from sys_farm_tool sft
+        inner join sys_user su on sft.create_user = su.username
+        where  sft.id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_farm_tool where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_farm_tool where id = #{id}
+    </delete>
+
+
+</mapper>

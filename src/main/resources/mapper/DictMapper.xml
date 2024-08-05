@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.DictMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.agricultural.products.entity.Dict">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="value" property="value" />
+        <result column="type" property="type" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, value, type
+    </sql>
+
+
+
+    <insert id="insert">
+        insert into sys_dict
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            name,
+            value,
+            type,
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{name},
+            #{value},
+            #{type},
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_dict set
+        <trim suffixOverrides=",">
+            name = #{name},
+            value = #{value},
+            type = #{type},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.Dict">
+        select
+            <include refid="Base_Column_List"></include>
+        from sys_dict
+        <where>
+            <if test="dict.name != null and dict.name != ''">
+                and name like concat('%', #{dict.name}, '%')
+            </if>
+            <if test="dict.value != null and dict.value != ''">
+                and value like concat('%', #{dict.value}, '%')
+            </if>
+            <if test="dict.type != null and dict.type != ''">
+                and type = #{dict.type}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.Dict">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_dict
+        where id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_dict where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_dict where id = #{id}
+    </delete>
+
+
+</mapper>

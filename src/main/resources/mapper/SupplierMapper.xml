@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.SupplierMapper">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Supplier_Base_Column_List">
+        ss.id, ss.name, ss.address, ss.contacts, ss.create_user, ss.create_time
+    </sql>
+
+    <insert id="insert">
+        insert into sys_supplier
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            name,
+            address,
+            contacts,
+            create_user,
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{name},
+            #{address},
+            #{contacts},
+            #{createUser},
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_supplier set
+        <trim suffixOverrides=",">
+            name = #{name},
+            address = #{address},
+            contacts = #{contacts},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.dto.SupplierDTO">
+        select
+            <include refid="Supplier_Base_Column_List"></include>
+            ,su.full_name as createUserName
+        from sys_supplier ss
+        inner join sys_user su on ss.create_user = su.username
+        <where>
+            <if test="supplier.name != null and supplier.name != ''">
+                and ss.name like concat('%', #{supplier.name}, '%')
+            </if>
+            <if test="supplier.address != null and supplier.address != ''">
+                and ss.address like concat('%', #{supplier.address}, '%')
+            </if>
+            <if test="supplier.contacts != null and supplier.contacts != ''">
+                and ss.contacts like concat('%', #{supplier.contacts}, '%')
+            </if>
+            <if test="supplier.createUser != null and supplier.createUser != ''">
+                and ss.create_user = #{supplier.createUser}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.dto.SupplierDTO">
+        select
+        <include refid="Supplier_Base_Column_List"></include>
+        ,su.full_name as createUserName
+        from sys_supplier ss
+        inner join sys_user su on ss.create_user = su.username
+        where  ss.id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_supplier where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_supplier where id = #{id}
+    </delete>
+
+
+</mapper>

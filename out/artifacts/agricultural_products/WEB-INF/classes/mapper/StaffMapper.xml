@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.StaffMapper">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Staff_Base_Column_List">
+        ss.id, ss.dept_id, ss.full_name, ss.sex, ss.position, ss.phone, ss.entry_date, ss.create_user, ss.create_time
+    </sql>
+
+    <insert id="insert">
+        insert into sys_staff
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            dept_id,
+            full_name,
+            sex,
+            position,
+            phone,
+            entry_date,
+            create_user,
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{deptId},
+            #{fullName},
+            #{sex},
+            #{position},
+            #{phone},
+            #{entryDate},
+            #{createUser},
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_staff set
+        <trim suffixOverrides=",">
+            dept_id = #{deptId},
+            full_name = #{fullName},
+            sex = #{sex},
+            position = #{position},
+            phone = #{phone},
+            entry_date = #{entryDate},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.dto.StaffDTO">
+        select
+            <include refid="Staff_Base_Column_List"></include>
+            ,su.full_name as createUserName
+            ,sd.name as deptName
+            ,sd.eid as eid
+            ,se.name as enterpriseName
+        from sys_staff ss
+        inner join sys_user su on ss.create_user = su.username
+        left join sys_dept sd on ss.dept_id = sd.id
+        left join sys_enterprise se on sd.eid = se.id
+        <where>
+            <if test="staff.deptId != null">
+                and ss.dept_id = #{staff.deptId}
+            </if>
+            <if test="staff.eid != null">
+                and sd.eid = #{staff.eid}
+            </if>
+            <if test="staff.fullName != null and staff.fullName != ''">
+                and ss.full_name like concat('%', #{staff.fullName}, '%')
+            </if>
+            <if test="staff.sex != null and staff.sex != ''">
+                and ss.sex like concat('%', #{staff.sex}, '%')
+            </if>
+            <if test="staff.position != null and staff.position != ''">
+                and ss.position like concat('%', #{staff.position}, '%')
+            </if>
+            <if test="staff.phone != null and staff.phone != ''">
+                and ss.phone like concat('%', #{staff.phone}, '%')
+            </if>
+            <if test="staff.createUser != null and staff.createUser != ''">
+                and ss.create_user = #{staff.createUser}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.dto.StaffDTO">
+        select
+        <include refid="Staff_Base_Column_List"></include>
+        ,su.full_name as createUserName
+        from sys_staff ss
+        inner join sys_user su on ss.create_user = su.username
+        where  ss.id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_staff where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_staff where id = #{id}
+    </delete>
+
+
+</mapper>

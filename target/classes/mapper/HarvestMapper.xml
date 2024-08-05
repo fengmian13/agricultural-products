@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.HarvestMapper">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Harvest_Base_Column_List">
+        sh.id, sh.sid, sh.harvest_time, sh.harvester, sh.create_user, sh.create_time, sh.img
+    </sql>
+
+    <insert id="insert">
+        insert into sys_harvest
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            sid,
+            harvest_time,
+            harvester,
+            create_user,
+            <if test="createTime != null">
+                create_time,
+            </if>
+            img,
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{sid},
+            #{harvestTime},
+            #{harvester},
+            #{createUser},
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            #{img},
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_harvest set
+        <trim suffixOverrides=",">
+            sid = #{sid},
+            harvest_time = #{harvestTime},
+            harvester = #{harvester},
+            img = #{img},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.dto.HarvestDTO">
+        select
+            <include refid="Harvest_Base_Column_List"></include>
+            ,su.full_name as createUserName
+        from sys_harvest sh
+        inner join sys_user su on sh.create_user = su.username
+        <where>
+            <if test="harvest.sid != null">
+                and sh.sid = #{harvest.sid}
+            </if>
+            <if test="harvest.harvester != null and harvest.harvester != ''">
+                and sh.harvester like concat('%', #{harvest.harvester}, '%')
+            </if>
+            <if test="harvest.createUser != null and harvest.createUser != ''">
+                and sh.create_user = #{harvest.createUser}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.dto.HarvestDTO">
+        select
+        <include refid="Harvest_Base_Column_List"></include>
+        ,su.full_name as createUserName
+        from sys_harvest sh
+        inner join sys_user su on sh.create_user = su.username
+        where  sh.id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_harvest where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_harvest where id = #{id}
+    </delete>
+
+
+</mapper>

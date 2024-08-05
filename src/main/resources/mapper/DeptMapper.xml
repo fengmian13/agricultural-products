@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.DeptMapper">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Dept_Base_Column_List">
+        sd.id, sd.eid, sd.name, sd.manager, sd.create_user, sd.create_time
+    </sql>
+
+    <insert id="insert">
+        insert into sys_dept
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            eid,
+            name,
+            manager,
+            create_user,
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{eid},
+            #{name},
+            #{manager},
+            #{createUser},
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_dept set
+        <trim suffixOverrides=",">
+            eid = #{eid},
+            name = #{name},
+            manager = #{manager},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.dto.DeptDTO">
+        select
+            <include refid="Dept_Base_Column_List"></include>
+            ,su.full_name as createUserName
+            ,se.name as enterpriseName
+        from sys_dept sd
+        inner join sys_user su on sd.create_user = su.username
+        inner join sys_enterprise se on se.id = sd.eid
+        <where>
+            <if test="dept.eid != null">
+                and sd.eid = #{dept.eid}
+            </if>
+            <if test="dept.name != null and dept.name != ''">
+                and sd.name like concat('%', #{dept.name}, '%')
+            </if>
+            <if test="dept.manager != null and dept.manager != ''">
+                and sd.manager like concat('%', #{dept.manager}, '%')
+            </if>
+            <if test="dept.createUser != null and dept.createUser != ''">
+                and sd.create_user = #{dept.createUser}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.dto.DeptDTO">
+        select
+        <include refid="Dept_Base_Column_List"></include>
+        ,su.full_name as createUserName
+        from sys_dept sd
+        inner join sys_user su on sd.create_user = su.username
+        where  sd.id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_dept where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_dept where id = #{id}
+    </delete>
+
+
+</mapper>

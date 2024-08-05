@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.MachiningMapper">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Machining_Base_Column_List">
+        sm.id, sm.pid, sm.eid, sm.machining_time, sm.machining_staff, sm.img, sm.method, sm.create_user, sm.create_time
+    </sql>
+
+    <insert id="insert">
+        insert into sys_machining
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            pid,
+            eid,
+            machining_time,
+            machining_staff,
+            img,
+            method,
+            create_user,
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{pid},
+            #{eid},
+            #{machiningTime},
+            #{machiningStaff},
+            #{img},
+            #{method},
+            #{createUser},
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_machining set
+        <trim suffixOverrides=",">
+            pid = #{pid},
+            eid = #{eid},
+            machining_time = #{machiningTime},
+            machining_staff = #{machiningStaff},
+            img = #{img},
+            method = #{method},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.dto.MachiningDTO">
+        select
+            <include refid="Machining_Base_Column_List"></include>
+            ,su.full_name as createUserName
+        from sys_machining sm
+        inner join sys_user su on sm.create_user = su.username
+        <where>
+            <if test="machining.pid != null">
+                and sm.pid = #{machining.pid}
+            </if>
+            <if test="machining.eid != null">
+                and sm.eid = #{machining.eid}
+            </if>
+            <if test="machining.machiningStaff != null and machining.machiningStaff != ''">
+                and sm.machining_staff like concat('%', #{machining.machiningStaff}, '%')
+            </if>
+            <if test="machining.method != null and machining.method != ''">
+                and sm.method like concat('%', #{machining.method}, '%')
+            </if>
+            <if test="machining.createUser != null and machining.createUser != ''">
+                and sm.create_user = #{machining.createUser}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.dto.MachiningDTO">
+        select
+        <include refid="Machining_Base_Column_List"></include>
+        ,su.full_name as createUserName
+        from sys_machining sm
+        inner join sys_user su on sm.create_user = su.username
+        where  sm.id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_machining where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_machining where id = #{id}
+    </delete>
+
+
+</mapper>

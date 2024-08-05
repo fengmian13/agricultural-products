@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.SeedMapper">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Seed_Base_Column_List">
+        ss.id, ss.eid, ss.seed_type, ss.seed_num, ss.days, ss.price, ss.create_user, ss.create_time
+    </sql>
+
+    <insert id="insert">
+        insert into sys_seed
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            eid,
+            seed_type,
+            seed_num,
+            days,
+            price,
+            create_user,
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{eid},
+            #{seedType},
+            #{seedNum},
+            #{days},
+            #{price},
+            #{createUser},
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_seed set
+        <trim suffixOverrides=",">
+            eid = #{eid},
+            seed_type = #{seedType},
+            seed_num = #{seedNum},
+            days = #{days},
+            price = #{price},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.dto.SeedDTO">
+        select
+            <include refid="Seed_Base_Column_List"></include>
+            ,su.full_name as createUserName
+            ,se.name as enterpriseName
+        from sys_seed ss
+        inner join sys_user su on ss.create_user = su.username
+        inner join sys_enterprise se on se.id = ss.eid
+        <where>
+            <if test="seed.eid != null">
+                and ss.eid = #{seed.eid}
+            </if>
+            <if test="seed.seedType != null and seed.seedType != ''">
+                and ss.seed_type like concat('%', #{seed.seedType}, '%')
+            </if>
+            <if test="seed.seedNum != null">
+                and ss.seed_num = #{seed.seedNum}
+            </if>
+            <if test="seed.days != null">
+                and ss.days = #{seed.days}
+            </if>
+            <if test="seed.price != null and seed.price != ''">
+                and ss.price like concat('%', #{seed.price}, '%')
+            </if>
+            <if test="seed.createUser != null and seed.createUser != ''">
+                and ss.create_user = #{seed.createUser}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.dto.SeedDTO">
+        select
+        <include refid="Seed_Base_Column_List"></include>
+        ,su.full_name as createUserName
+        from sys_seed ss
+        inner join sys_user su on ss.create_user = su.username
+        where  ss.id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_seed where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_seed where id = #{id}
+    </delete>
+
+
+</mapper>

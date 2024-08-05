@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.SowingMapper">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Sowing_Base_Column_List">
+        ss.id, ss.sid, ss.area, ss.sowing_time, ss.seeder, ss.status, ss.create_user, ss.create_time, ss.img
+    </sql>
+
+    <insert id="insert">
+        insert into sys_sowing
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            sid,
+            area,
+            sowing_time,
+            seeder,
+            status,
+            create_user,
+            <if test="createTime != null">
+                create_time,
+            </if>
+            img,
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{sid},
+            #{area},
+            #{sowingTime},
+            #{seeder},
+            #{status},
+            #{createUser},
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            #{img},
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_sowing set
+        <trim suffixOverrides=",">
+            sid = #{sid},
+            area = #{area},
+            sowing_time = #{sowingTime},
+            seeder = #{seeder},
+            status = #{status},
+            img = #{img},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.dto.SowingDTO">
+        select
+            <include refid="Sowing_Base_Column_List"></include>
+            ,su.full_name as createUserName
+            ,ssd.seed_type as seedType
+        from sys_sowing ss
+        inner join sys_user su on ss.create_user = su.username
+        inner join sys_seed ssd on ssd.id = ss.sid
+        <where>
+            <if test="sowing.sid != null">
+                and ss.sid = #{sowing.sid}
+            </if>
+            <if test="sowing.area != null and sowing.area != ''">
+                and ss.area like concat('%', #{sowing.area}, '%')
+            </if>
+            <if test="sowing.seeder != null and sowing.seeder != ''">
+                and ss.seeder like concat('%', #{sowing.seeder}, '%')
+            </if>
+            <if test="sowing.status != null and sowing.status != ''">
+                and ss.status = #{sowing.status}
+            </if>
+            <if test="sowing.createUser != null and sowing.createUser != ''">
+                and ss.create_user = #{sowing.createUser}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.dto.SowingDTO">
+        select
+        <include refid="Sowing_Base_Column_List"></include>
+        ,su.full_name as createUserName
+        ,ssd.seed_type as seedType
+        from sys_sowing ss
+        inner join sys_seed ssd on ssd.id = ss.sid
+        inner join sys_user su on ss.create_user = su.username
+        where  ss.id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_sowing where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_sowing where id = #{id}
+    </delete>
+
+
+</mapper>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.ActivityMapper">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Activity_Base_Column_List">
+        sa.id, sa.activity_time, sa.content, sa.address, sa.mode, sa.create_user, sa.create_time
+    </sql>
+
+    <insert id="insert">
+        insert into sys_activity
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            activity_time,
+            content,
+            address,
+            mode,
+            create_user,
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{activityTime},
+            #{content},
+            #{address},
+            #{mode},
+            #{createUser},
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_activity set
+        <trim suffixOverrides=",">
+            activity_time = #{activityTime},
+            content = #{content},
+            address = #{address},
+            mode = #{mode},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.dto.ActivityDTO">
+        select
+            <include refid="Activity_Base_Column_List"></include>
+            ,su.full_name as createUserName
+        from sys_activity sa
+        inner join sys_user su on sa.create_user = su.username
+        <where>
+            <if test="activity.content != null and activity.content != ''">
+                and sa.content like concat('%', #{activity.content}, '%')
+            </if>
+            <if test="activity.address != null and activity.address != ''">
+                and sa.address like concat('%', #{activity.address}, '%')
+            </if>
+            <if test="activity.mode != null and activity.mode != ''">
+                and sa.mode like concat('%', #{activity.mode}, '%')
+            </if>
+            <if test="activity.createUser != null and activity.createUser != ''">
+                and sa.create_user = #{activity.createUser}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.dto.ActivityDTO">
+        select
+        <include refid="Activity_Base_Column_List"></include>
+        ,su.full_name as createUserName
+        from sys_activity sa
+        inner join sys_user su on sa.create_user = su.username
+        where  sa.id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_activity where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_activity where id = #{id}
+    </delete>
+
+
+</mapper>

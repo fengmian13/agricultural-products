@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!-- spring 配置文件核心点 ：ioc容器扫描 数据源配置 与mybatis整合配置 事务控制 -->
+
+    <!-- 开启注解扫描 扫描对应包下带有注解的类  排除controller-->
+    <context:component-scan base-package="com.agricultural.products" >
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+
+    <!-- 引入数据源配置文件 ignore-unresolvable="true" 忽略解析不到的属性 -->
+    <context:property-placeholder ignore-unresolvable="true" location="classpath:jdbc.properties" />
+
+    <!-- 数据源 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="url" value="${jdbc.jdbcUrl}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+    </bean>
+
+    <!-- 配置与mybatis的整合  构建sqlSessionFactory -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- 指定配置mybatis配置文件位置 也可不用mybatis配置文件 直接将配置配置到当前类的属性property中-->
+        <property name="configLocation" value="classpath:mybatis.xml" />
+        <!-- 注入数据源属性 -->
+        <property name="dataSource" ref="dataSource" />
+        <!-- 指定mybatis的xml文件位置 -->
+        <property name="mapperLocations" value="classpath:mapper/*.xml" />
+    </bean>
+
+    <!-- 配置扫描器 扫描basePackage下 的接口 创建为动态代理的dao对象 加入ioc容器中 -->
+    <bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!-- 声明sqlSessionFactory bean对象的名称-->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+        <property name="basePackage" value="com.agricultural.products.mapper"/>
+    </bean>
+
+    <!-- 事务控制的配置  -->
+
+    <!-- 事务管理器配置 必须的-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!-- 控制的数据源 -->
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <!-- 启用注解驱动的事务管理 -->
+    <tx:annotation-driven transaction-manager="transactionManager" />
+</beans>

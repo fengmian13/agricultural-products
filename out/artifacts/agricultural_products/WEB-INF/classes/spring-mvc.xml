@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <context:property-placeholder ignore-unresolvable="true" location="classpath:app.properties" />
+
+    <!-- mvc 控制层配置 -->
+
+    <!-- 配置注解扫描包 只扫描 注解的Controller类  -->
+    <context:component-scan base-package="com.agricultural.products" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!--
+       配置视图解析器 /WEB-INF/view/ 第一个 '/' 代表项目根路径
+       不带第一个’/‘ 会导致相对路径问题
+   -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/views/" />
+        <property name="suffix" value=".jsp" />
+    </bean>
+
+    <!-- 配置文件解析器 -->
+    <bean class="org.springframework.web.multipart.commons.CommonsMultipartResolver" id="multipartResolver"></bean>
+
+    <!-- 注解驱动 针对消息返回格式 增加返回消息格式转换类 以及其他的高级功能 -->
+    <mvc:annotation-driven />
+
+    <!-- 中央调度器处理所有请求时，静态资源访问  将springmvc请求无法处理的交给tomcat-->
+    <mvc:default-servlet-handler />
+
+
+    <!--配置拦截器-->
+    <mvc:interceptors>
+        <!--配置拦截器-->
+        <mvc:interceptor>
+            <!--要拦截的具体的方法-->
+            <mvc:mapping path="/**"/>
+            <!--不要拦截的方法 -->
+            <mvc:exclude-mapping path="/user/login"/>
+            <mvc:exclude-mapping path="/user/register"/>
+            <mvc:exclude-mapping path="/file/**"/>
+            <!--配置拦截器对象-->
+            <bean class="com.agricultural.products.config.interceptor.JwtInterceptor" />
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+</beans>

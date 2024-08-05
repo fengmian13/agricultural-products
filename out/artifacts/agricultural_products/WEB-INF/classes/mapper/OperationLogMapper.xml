@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.OperationLogMapper">
+
+    <!-- 通用查询结果列 -->
+    <sql id="OperationLog_Base_Column_List">
+        sol.id, sol.method, sol.content, sol.create_user, sol.create_time
+    </sql>
+
+    <insert id="insert">
+        insert into sys_operation_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            method,
+            content,
+            create_user,
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{method},
+            #{content},
+            #{createUser},
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_operation_log set
+        <trim suffixOverrides=",">
+            method = #{method},
+            content = #{content},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.dto.OperationLogDTO">
+        select
+            <include refid="OperationLog_Base_Column_List"></include>
+            ,su.full_name as createUserName
+        from sys_operation_log sol
+        inner join sys_user su on sol.create_user = su.username
+        <where>
+            <if test="operationLog.method != null and operationLog.method != ''">
+                and sol.method like concat('%', #{operationLog.method}, '%')
+            </if>
+            <if test="operationLog.content != null and operationLog.content != ''">
+                and sol.content like concat('%', #{operationLog.content}, '%')
+            </if>
+            <if test="operationLog.createUser != null and operationLog.createUser != ''">
+                and sol.create_user = #{operationLog.createUser}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.dto.OperationLogDTO">
+        select
+        <include refid="OperationLog_Base_Column_List"></include>
+        ,su.full_name as createUserName
+        from sys_operation_log sol
+        inner join sys_user su on sol.create_user = su.username
+        where  sol.id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_operation_log where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_operation_log where id = #{id}
+    </delete>
+
+
+</mapper>

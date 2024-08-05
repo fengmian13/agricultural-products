@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.EnterpriseMapper">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Enterprise_Base_Column_List">
+        se.id, se.name, se.reg_date, se.address, se.manager, se.supplier_id, se.create_user, se.create_time
+    </sql>
+
+    <insert id="insert">
+        insert into sys_enterprise
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            name,
+            reg_date,
+            address,
+            manager,
+            supplier_id,
+            create_user,
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{name},
+            #{regDate},
+            #{address},
+            #{manager},
+            #{supplierId},
+            #{createUser},
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_enterprise set
+        <trim suffixOverrides=",">
+            name = #{name},
+            reg_date = #{regDate},
+            address = #{address},
+            manager = #{manager},
+            supplier_id = #{supplierId},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.dto.EnterpriseDTO">
+        select
+            <include refid="Enterprise_Base_Column_List"></include>
+            ,su.full_name as createUserName
+        from sys_enterprise se
+        inner join sys_user su on se.create_user = su.username
+        <where>
+            <if test="enterprise.name != null and enterprise.name != ''">
+                and se.name like concat('%', #{enterprise.name}, '%')
+            </if>
+            <if test="enterprise.address != null and enterprise.address != ''">
+                and se.address like concat('%', #{enterprise.address}, '%')
+            </if>
+            <if test="enterprise.manager != null and enterprise.manager != ''">
+                and se.manager like concat('%', #{enterprise.manager}, '%')
+            </if>
+            <if test="enterprise.supplierId != null and enterprise.supplierId != ''">
+                and se.supplier_id like concat('%', #{enterprise.supplierId}, '%')
+            </if>
+            <if test="enterprise.createUser != null and enterprise.createUser != ''">
+                and se.create_user = #{enterprise.createUser}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.dto.EnterpriseDTO">
+        select
+        <include refid="Enterprise_Base_Column_List"></include>
+        ,su.full_name as createUserName
+        from sys_enterprise se
+        inner join sys_user su on se.create_user = su.username
+        where  se.id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_enterprise where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_enterprise where id = #{id}
+    </delete>
+
+
+</mapper>

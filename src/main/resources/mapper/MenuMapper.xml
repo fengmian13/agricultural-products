@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agricultural.products.mapper.MenuMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.agricultural.products.entity.Menu">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="path" property="path" />
+        <result column="icon" property="icon" />
+        <result column="description" property="description" />
+        <result column="pid" property="pid" />
+        <result column="page_path" property="pagePath" />
+        <result column="sort_num" property="sortNum" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, path, icon, description, pid, page_path, sort_num
+    </sql>
+
+
+
+    <insert id="insert">
+        insert into sys_menu
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            name,
+            path,
+            icon,
+            description,
+            pid,
+            page_path,
+            sort_num,
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{name},
+            #{path},
+            #{icon},
+            #{description},
+            #{pid},
+            #{pagePath},
+            #{sortNum},
+        </trim>
+    </insert>
+
+
+    <update id="update">
+        update sys_menu set
+        <trim suffixOverrides=",">
+            name = #{name},
+            path = #{path},
+            icon = #{icon},
+            description = #{description},
+            pid = #{pid},
+            page_path = #{pagePath},
+            sort_num = #{sortNum},
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="selectList" resultType="com.agricultural.products.entity.Menu">
+        select
+            <include refid="Base_Column_List"></include>
+        from sys_menu
+        <where>
+            <if test="menu.name != null and menu.name != ''">
+                and name like concat('%', #{menu.name}, '%')
+            </if>
+            <if test="menu.path != null and menu.path != ''">
+                and path like concat('%', #{menu.path}, '%')
+            </if>
+            <if test="menu.icon != null and menu.icon != ''">
+                and icon like concat('%', #{menu.icon}, '%')
+            </if>
+            <if test="menu.description != null and menu.description != ''">
+                and description like concat('%', #{menu.description}, '%')
+            </if>
+            <if test="menu.pid != null">
+                and pid = #{menu.pid}
+            </if>
+            <if test="menu.pagePath != null and menu.pagePath != ''">
+                and page_path like concat('%', #{menu.pagePath}, '%')
+            </if>
+            <if test="menu.sortNum != null">
+                and sort_num = #{menu.sortNum}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="getById" resultType="com.agricultural.products.entity.Menu">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_menu
+        where id = #{id}
+    </select>
+
+    <delete id="deleteBatchIds">
+        delete from sys_menu where id in
+        <foreach collection="ids" separator="," item="id" open="( " close=" )" >
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <delete id="deleteById">
+        delete from sys_menu where id = #{id}
+    </delete>
+
+
+</mapper>
