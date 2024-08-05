@@ -11,14 +11,18 @@ import java.lang.annotation.*;
 public @interface Log {
     /**
      * 操作名称
+     *
      * @return
      */
     String method() default "";
 
     /**
      * 资源名称
+     *
      * @return
      */
     String resource() default "";
 
+
+    /*test*/
 }
